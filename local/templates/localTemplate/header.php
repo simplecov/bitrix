@@ -67,6 +67,15 @@ $theme = COption::GetOptionString("main", "wizard_eshop_bootstrap_theme_id", "bl
 					);?>
 				</div>
 			</div>
+
+            <?if($curPage == SITE_DIR."index.php"):?>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <a class="btn btn-primary " href="/currency/">Курсы валют</a>
+                    </div>
+                </div>
+            <?endif;?>
+
 			<div class="row">
 				<div class="col-md-12 hidden-xs">
 					<?$APPLICATION->IncludeComponent("bitrix:menu", "catalog_horizontal", array(
@@ -88,6 +97,7 @@ $theme = COption::GetOptionString("main", "wizard_eshop_bootstrap_theme_id", "bl
 					);?>
 				</div>
 			</div>
+
 			<?if ($curPage != SITE_DIR."index.php"):?>
 			<div class="row">
 				<div class="col-lg-12">
@@ -122,6 +132,8 @@ $theme = COption::GetOptionString("main", "wizard_eshop_bootstrap_theme_id", "bl
 			</div>
 			<?endif?>
 
+
+
 			<?
 			if ($curPage != SITE_DIR."index.php")
 			{
@@ -148,6 +160,7 @@ $theme = COption::GetOptionString("main", "wizard_eshop_bootstrap_theme_id", "bl
 			<?
 			}
 			?>
+
 		</div>
 	</header>
 
