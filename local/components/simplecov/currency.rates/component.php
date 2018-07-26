@@ -1,5 +1,6 @@
 <?
 if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
+global $baseCurrency;
 
 /**
  * @global CMain $APPLICATION
@@ -9,7 +10,7 @@ if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 if (!$this->InitComponentTemplate())
 	return;
 
-$this->IncludeComponentTemplate();
+
 
 // Код базовой валюты сайта
 $baseCurrency = CCurrency::GetBaseCurrency();
@@ -32,6 +33,8 @@ wwq($query);
 //wwq($arrData);
 
 //wwq('asdasdasd');
+
+$this->IncludeComponentTemplate();
 
 
 

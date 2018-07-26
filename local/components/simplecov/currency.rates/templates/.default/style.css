@@ -1,25 +1,30 @@
-.bx-breadcrumb {
-	margin: 10px 0;
+.currency-block{
+	padding: 0 0 35px 0;
 }
-.bx-breadcrumb i {
-	color: #b5bdc2;
-	line-height: 13px;
-	font-size: 12px;
-	vertical-align: middle;
-	margin-right: 5px;
+
+.request-form{
+	padding: 0 0 15px 0;
 }
-.bx-breadcrumb .bx-breadcrumb-item {
-	float: left;
-	margin-bottom: 10px;
-	white-space: nowrap;
-	line-height: 13px;
-	vertical-align: middle;
-	margin-right: 10px;
+
+.request-form .form-text{
+	display: inline-block;
+	width: 100px;
 }
-.bx-breadcrumb .bx-breadcrumb-item span {
-	font-family: "Open Sans", Arial, "Helvetica Neue", Helvetica, sans-serif;
-	font-size: 13px;
-	white-space: normal;
+
+.datepicker{
+	font-weight: 700;
+	outline: none;
+	border: none;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	-webkit-transition: all .3s;
+	-moz-transition: all .3s;
+	-ms-transition: all .3s;
+	-o-transition: all .3s;
+	transition: all .3s;
 }
-.bx-breadcrumb .bx-breadcrumb-item a {border-bottom: none;}
-.bx-breadcrumb .bx-breadcrumb-item a:hover {}
+.datepicker:hover{
+	cursor: pointer;
+	background: #f2f2f3;
+}

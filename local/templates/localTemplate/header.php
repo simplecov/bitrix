@@ -1,8 +1,13 @@
 <?if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)die();
+
+use Bitrix\Main\Page\Asset;
+$assets = Asset::getInstance();
+
 IncludeTemplateLangFile($_SERVER["DOCUMENT_ROOT"]."/bitrix/templates/".SITE_TEMPLATE_ID."/header.php");
 CJSCore::Init(array("fx"));
 $curPage = $APPLICATION->GetCurPage(true);
 $theme = COption::GetOptionString("main", "wizard_eshop_bootstrap_theme_id", "blue", SITE_ID);
+
 ?>
 <!DOCTYPE html>
 <html xml:lang="<?=LANGUAGE_ID?>" lang="<?=LANGUAGE_ID?>">
@@ -15,9 +20,14 @@ $theme = COption::GetOptionString("main", "wizard_eshop_bootstrap_theme_id", "bl
 	$APPLICATION->SetAdditionalCSS(SITE_TEMPLATE_PATH."/colors.css", true);
 	$APPLICATION->SetAdditionalCSS("/bitrix/css/main/bootstrap.css");
 	$APPLICATION->SetAdditionalCSS("/bitrix/css/main/font-awesome.css");
+    //    $APPLICATION->AddHeadScript(SITE_TEMPLATE_PATH."/js/jquery-3.3.1.slim.min.js");
+    //    $APPLICATION->AddHeadScript(SITE_TEMPLATE_PATH."/js/baseJS.js");
 
-    $APPLICATION->AddHeadScript(SITE_TEMPLATE_PATH."/js/jquery-3.3.1.slim.min.js");
-    $APPLICATION->AddHeadScript(SITE_TEMPLATE_PATH."/js/baseJS.js");
+    //$assets->addCss(SITE_TEMPLATE_PATH . "/css/datepicker.css");
+
+    $assets->addJs(SITE_TEMPLATE_PATH . "/js/jquery-3.3.1.slim.min.js");
+    $assets->addJs(SITE_TEMPLATE_PATH . "/js/datepicker.js");
+    $assets->addJs(SITE_TEMPLATE_PATH . "/js/baseJS.js");
 	?>
 	<title><?$APPLICATION->ShowTitle()?></title>
 </head>
