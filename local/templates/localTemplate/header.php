@@ -15,6 +15,9 @@ $theme = COption::GetOptionString("main", "wizard_eshop_bootstrap_theme_id", "bl
 	$APPLICATION->SetAdditionalCSS(SITE_TEMPLATE_PATH."/colors.css", true);
 	$APPLICATION->SetAdditionalCSS("/bitrix/css/main/bootstrap.css");
 	$APPLICATION->SetAdditionalCSS("/bitrix/css/main/font-awesome.css");
+
+    $APPLICATION->AddHeadScript(SITE_TEMPLATE_PATH."/js/jquery-3.3.1.slim.min.js");
+    $APPLICATION->AddHeadScript(SITE_TEMPLATE_PATH."/js/baseJS.js");
 	?>
 	<title><?$APPLICATION->ShowTitle()?></title>
 </head>

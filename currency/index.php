@@ -13,7 +13,7 @@ require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
         'EUR',
         'RUB'
     ),
-    'SOURCE' => 'GET https://exchangeratesapi.io/api/latest?symbols=USD,GBP'
+    'SOURCE' => 'https://exchangeratesapi.io/api/'
 ),
     false,
     Array('HIDE_ICONS' => 'Y')

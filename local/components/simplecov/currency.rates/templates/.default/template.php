@@ -1,5 +1,10 @@
 <?if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)die(); ?>
 
+<h3>Сделать запрос на сайт</h3>
+<h3>Фильтровать</h3>
+
+<input data-provide="datepicker">
+
 <table class="table table-sm">
     <thead>
     <tr>
