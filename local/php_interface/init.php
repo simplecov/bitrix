@@ -1,4 +1,5 @@
 <?
+include_once 'include/const.php';
 
 function wwq($data)
 {
