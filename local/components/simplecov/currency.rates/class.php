@@ -171,8 +171,6 @@ class CurrencyRates extends CBitrixComponent
             );
         }
 
-        wwq($arFilter);
-
         $rsData = $entity_data_class::getList(array(
             'select' => array('*'),
             'filter' => $arFilter

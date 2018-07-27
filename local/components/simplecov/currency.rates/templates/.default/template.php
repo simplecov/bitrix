@@ -23,7 +23,6 @@ $dateTo = $_GET['dateTo'];
         </div>
         <input type="hidden" name="request" value="external">
         <button type="submit" class="btn btn-success">Запрос</button>
-        <button type="submit" value="reset" class="btn btn-primary">Очистить</button>
     </form>
 </div>
 
@@ -44,32 +43,39 @@ $dateTo = $_GET['dateTo'];
         </div>
         <input type="hidden" name="request" value="internal">
         <button type="submit" class="btn btn-success">Показать</button>
-        <button type="submit" value="reset" class="btn btn-primary">Очистить</button>
     </form>
 </div>
 
 <div class="currency-block currency-table">
     <h2>Таблица курсов валют</h2>
-    <table class="table table-sm">
-        <thead>
-        <tr>
-            <th scope="col">Дата</th>
-            <?foreach ($arResult['CURRENCY_CODE'] as $code):?>
-                <th scope="col"><?=$code?></th>
-            <?endforeach;?>
-        </tr>
-        </thead>
-        <tbody>
-        <?foreach ($arResult['BY_DATE'] as $key => $values):?>
-            <tr>
-                <th scope="row"><?=$key?></th>
-                <?foreach ($values as $value):?>
-                    <td><?=$value?></td>
+    <?if(count($arResult['ELEMENTS']) > 0):?>
+        <div class="table-scroll">
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th scope="col">Дата</th>
+                    <?foreach ($arResult['CURRENCY_CODE'] as $code):?>
+                        <th scope="col"><?=$code?></th>
+                    <?endforeach;?>
+                </tr>
+                </thead>
+                <tbody>
+                <?foreach ($arResult['BY_DATE'] as $key => $values):?>
+                    <tr>
+                        <th scope="row"><?=$key?></th>
+                        <?foreach ($values as $value):?>
+                            <td><?=$value?></td>
+                        <?endforeach;?>
+                    </tr>
                 <?endforeach;?>
-            </tr>
-        <?endforeach;?>
-        </tbody>
-    </table>
+                </tbody>
+            </table>
+        </div>
+    <?endif?>
+    <?if(count($arResult['ELEMENTS']) == 0):?>
+        <h3 class="alert alert-note">Элементы по заданным датам не найдены</h3>
+    <?endif?>
+
 </div>
 
 

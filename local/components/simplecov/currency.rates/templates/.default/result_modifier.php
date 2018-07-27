@@ -21,9 +21,6 @@ foreach ($arResult['ELEMENTS'] as $key => $element)
 }
 
 
-wwq($arResult);
-
-
 
 
 

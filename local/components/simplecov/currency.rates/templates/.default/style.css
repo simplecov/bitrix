@@ -28,3 +28,7 @@
 	cursor: pointer;
 	background: #f2f2f3;
 }
+
+.table-scroll{
+	overflow: auto;
+}
