@@ -5,6 +5,7 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
 }
 
 use Bitrix\Highloadblock\HighloadBlockTable as HLBT;
+use \Bitrix\Main\Entity;
 
 //\CBitrixComponent::includeComponentClass('highloadblock');
 CModule::IncludeModule('highloadblock');
@@ -22,6 +23,8 @@ class CurrencyRates extends CBitrixComponent
 
     private $hlBlockID;
 
+    private $hlBlockEntity;
+
 
     /**
      * Инициализация сайта
@@ -30,6 +33,13 @@ class CurrencyRates extends CBitrixComponent
     {
         $this->SetHLBlockId();
         $this->SetSiteCurrency();
+        $this->GetEntityDataClass($this->hlBlockID);
+    }
+
+    public function ViewErrors()
+    {
+        if(!empty($this->errors))
+            wwq($this->errors);
     }
 
     /**
@@ -53,7 +63,7 @@ class CurrencyRates extends CBitrixComponent
      *
      * Возвращает код валюты сайта
      */
-    private function GetSiteCurrency()
+    public function GetSiteCurrency()
     {
         return $this->baseCurrencyCode;
     }
@@ -66,15 +76,15 @@ class CurrencyRates extends CBitrixComponent
      * Получаем экземпляр класса для манипуляций с hl-блоком
      */
     function GetEntityDataClass($HlBlockId) {
+
         if (empty($HlBlockId) || $HlBlockId < 1)
-        {
             return false;
-        }
+
         $hlblock = HLBT::getById($HlBlockId)->fetch();
         $entity = HLBT::compileEntity($hlblock);
-        $entity_data_class = $entity->getDataClass();
+        $this->hlBlockEntity = $entity->getDataClass();
 
-        return $entity_data_class;
+        return true;
     }
 
 
@@ -92,9 +102,45 @@ class CurrencyRates extends CBitrixComponent
         $queryData = file_get_contents($query);
         $arrData = json_decode($queryData, true);
 
+        if(empty($arrData))
+            $this->errors['empty'] = 'Данные не получены, попробуйте позднее';
+
         return $arrData;
     }
 
+
+    /**
+     * @param $date
+     * @return mixed
+     *
+     * Проверяет наличие элементов по дате
+     * Ограничивает дублирование информации
+     */
+    public function CheckElementsDataExists($date)
+    {
+        $entity_data_class = $this->hlBlockEntity;
+
+        $arFilter = Array(
+            Array(
+                "UF_DATE" => $this->FormatDateToSite($date),
+            )
+        );
+        $rsData = $entity_data_class::getList(array(
+            'select' => array('*'),
+            'runtime' => array(
+                new Entity\ExpressionField('*', 'COUNT(*)')
+            ),
+            'filter' => $arFilter
+        ));
+
+        if((int)$rsData->fetch()['*'] > 0)
+        {
+            $this->errors[] = 'Курсы на данную дату уже находятся в базе, повторная запись не произведена';
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * @param $source
@@ -117,14 +163,19 @@ class CurrencyRates extends CBitrixComponent
     {
         if(!empty($arrData))
         {
-            $entity_data_class = $this->GetEntityDataClass($this->hlBlockID);
+
+            $queriedDate = $this->FormatDateToSite($this->PrepareDate($_GET['date']));
+
+            $entity_data_class = $this->hlBlockEntity;
             foreach ($arrData['rates'] as $key => $rate)
             {
                 $result = $entity_data_class::add(array(
                     'UF_VALUE'        => $rate,
-                    'UF_DATE'         => $this->FormatDateToSite($this->PrepareDate($_GET['date'])),
+                    'UF_DATE'         => $queriedDate,
                     'UF_CODE'         => $key,
                 ));
+
+                $this->GetResultError($result);
             }
         }
     }
@@ -162,8 +213,54 @@ class CurrencyRates extends CBitrixComponent
         return date('Y-m-d', strtotime($date));
     }
 
+    /**
+     * Says ASDASDASDASDDASD
+     */
     public function sayASD(){
 
         echo 'ASDASDASDASDDASD';
+    }
+
+    /**
+     * @param $obj
+     * @param $prop
+     * @return mixed
+     * @throws ReflectionException
+     *
+     * Получает свойства объекта через reflection
+     */
+    private function accessProtected($obj, $prop) {
+
+        $reflection = new ReflectionClass($obj);
+        $property = $reflection->getProperty($prop);
+        $property->setAccessible(true);
+
+        return $property->getValue($obj);
+    }
+
+    /**
+     * @param $result
+     * @throws ReflectionException
+     *
+     *
+     */
+    private function GetResultError($result)
+    {
+        if(!empty($result))
+        {
+            $resultErrors = $this->accessProtected($result, errors);
+        }
+
+        if(!empty($resultErrors))
+        {
+            $values = $this->accessProtected($resultErrors, values)[0];
+        }
+
+        if(!empty($values))
+        {
+            $errorText = $this->accessProtected($values, message);
+            $this->errors[] = $errorText;
+        }
+
     }
 }
