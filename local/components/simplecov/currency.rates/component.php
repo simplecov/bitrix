@@ -41,8 +41,7 @@ if($_GET['request'] == 'external')
 
 if($_GET['request'] == 'internal')
 {
-    $arrData = $this->GetQueryData($arParams['SOURCE'], $_GET['date']);
-    //$this->SaveData($arrData);
+    $this->GetElements($_GET['dateFrom'], $_GET['dateTo']);
 }
 
 $this->ViewErrors();

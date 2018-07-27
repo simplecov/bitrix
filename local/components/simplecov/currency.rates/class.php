@@ -135,11 +135,49 @@ class CurrencyRates extends CBitrixComponent
 
         if((int)$rsData->fetch()['*'] > 0)
         {
-            $this->errors[] = 'Курсы на данную дату уже находятся в базе, повторная запись не произведена';
+            $this->errors[] = 'Курсы валют на выбранную дату уже находятся в базе, повторная запись не произведена';
             return true;
         }
 
         return false;
+    }
+
+
+    /**
+     * @param $dateFrom
+     * @param string $dateTo
+     *
+     * Возвращает элементы по заданным датам
+     */
+    public function GetElements($dateFrom, $dateTo = '')
+    {
+        $entity_data_class = $this->hlBlockEntity;
+
+        $arFilter = array();
+        if($dateTo == '')
+        {
+            $arFilter['UF_DATE'] = $this->FormatDateToSite($dateFrom);
+        }
+        else
+        {
+            $arFilter['LOGIC'] = "AND";
+            $arFilter[] = array(
+                ">=UF_DATE" => $this->FormatDateToSite($dateFrom)
+            );
+            $arFilter[] = array(
+                "<=UF_DATE" => $this->FormatDateToSite($dateTo)
+            );
+        }
+
+        wwq($arFilter);
+
+        $rsData = $entity_data_class::getList(array(
+            'select' => array('*'),
+            'filter' => $arFilter
+        ));
+        while($el = $rsData->fetch()){
+            $this->arResult['ELEMENTS'][] = $el;
+        }
     }
 
     /**
@@ -159,6 +197,12 @@ class CurrencyRates extends CBitrixComponent
     }
 
 
+    /**
+     * @param $arrData
+     * @throws ReflectionException
+     *
+     * Записывает информацию в hl-блок
+     */
     public function SaveData($arrData)
     {
         if(!empty($arrData))
@@ -195,7 +239,7 @@ class CurrencyRates extends CBitrixComponent
      * @param $date
      * @return false|string
      *
-     * Приводим дату к формату сайта
+     * Приводит дату к формату сайта
      */
     protected function FormatDateToSite($date)
     {
@@ -206,7 +250,7 @@ class CurrencyRates extends CBitrixComponent
      * @param $date
      * @return false|string
      *
-     * Приводим дату к формату компонента
+     * Приводит дату к формату компонента
      */
     protected function FormatDateToComponent($date)
     {
@@ -242,7 +286,7 @@ class CurrencyRates extends CBitrixComponent
      * @param $result
      * @throws ReflectionException
      *
-     *
+     * Ищет ошибку...жесть, короче
      */
     private function GetResultError($result)
     {

@@ -4,6 +4,8 @@ global $baseCurrency;
 $requestDate = $_GET['date'];
 $dateFrom = $_GET['dateFrom'];
 $dateTo = $_GET['dateTo'];
+
+
 ?>
 
 <div class="currency-block currency-submit-form">
