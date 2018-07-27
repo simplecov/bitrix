@@ -53,31 +53,21 @@ $dateTo = $_GET['dateTo'];
     <table class="table table-sm">
         <thead>
         <tr>
-            <th scope="col">#</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Handle</th>
+            <th scope="col">Дата</th>
+            <?foreach ($arResult['CURRENCY_CODE'] as $code):?>
+                <th scope="col"><?=$code?></th>
+            <?endforeach;?>
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-        </tr>
-        <tr>
-            <th scope="row">2</th>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>@fat</td>
-        </tr>
-        <tr>
-            <th scope="row">3</th>
-            <td>Larry</td>
-            <td>the Bird</td>
-            <td>@twitter</td>
-        </tr>
+        <?foreach ($arResult['BY_DATE'] as $key => $values):?>
+            <tr>
+                <th scope="row"><?=$key?></th>
+                <?foreach ($values as $value):?>
+                    <td><?=$value?></td>
+                <?endforeach;?>
+            </tr>
+        <?endforeach;?>
         </tbody>
     </table>
 </div>
