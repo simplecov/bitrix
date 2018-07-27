@@ -102,6 +102,8 @@ class CurrencyRates extends CBitrixComponent
         $queryData = file_get_contents($query);
         $arrData = json_decode($queryData, true);
 
+        $this->CollectCurrencyCodes($arrData);
+
         if(empty($arrData))
             $this->errors['empty'] = 'Данные не получены, попробуйте позднее';
 
@@ -307,4 +309,16 @@ class CurrencyRates extends CBitrixComponent
         }
 
     }
+
+    /**
+     * @param $arrData
+     *
+     * Записывает в arResult список кодов полученных валют
+     */
+    private function CollectCurrencyCodes($arrData)
+    {
+        if(!empty($arrData))
+            $this->arResult['CUR_CODE'] = array_keys($arrData['rates']);
+    }
+
 }

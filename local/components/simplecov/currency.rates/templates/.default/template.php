@@ -4,8 +4,6 @@ global $baseCurrency;
 $requestDate = $_GET['date'];
 $dateFrom = $_GET['dateFrom'];
 $dateTo = $_GET['dateTo'];
-
-
 ?>
 
 <div class="currency-block currency-submit-form">
@@ -29,8 +27,8 @@ $dateTo = $_GET['dateTo'];
     </form>
 </div>
 
-<div class="currency-block currency-table">
-    <h2>Курсы валют</h2>
+<div class="currency-block currency-filter-form">
+    <h2>Фильтр валют по датам</h2>
     <form class="request-form" method="get">
         <div class="form-group">
             <div>
@@ -48,6 +46,10 @@ $dateTo = $_GET['dateTo'];
         <button type="submit" class="btn btn-success">Показать</button>
         <button type="submit" value="reset" class="btn btn-primary">Очистить</button>
     </form>
+</div>
+
+<div class="currency-block currency-table">
+    <h2>Таблица курсов валют</h2>
     <table class="table table-sm">
         <thead>
         <tr>
