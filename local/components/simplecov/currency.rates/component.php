@@ -23,20 +23,14 @@ if (!$this->InitComponentTemplate())
 	return;
 
 /**
- * Инициализируем класс
- */
-$this->init();
-
-global $baseCurrency;
-$baseCurrency = $this->GetSiteCurrency();
-/**
  * Обработка внешнего запроса
  */
 if($_GET['request'] == 'external')
 {
     $arrData = $this->GetQueryData($arParams['SOURCE'], $_GET['date'], $_GET['getstack']);
-    if(!$this->CheckElementsDataExists($_GET['date']))
-        $this->SaveData($arrData);
+    wwq($arrData);
+//    if(!$this->CheckElementsDataExists($_GET['date']))
+//        $this->SaveData($arrData);
 }
 
 if($_GET['request'] == 'internal')
@@ -45,7 +39,6 @@ if($_GET['request'] == 'internal')
 }
 
 $this->ViewErrors();
-
 $this->IncludeComponentTemplate();
 
 

@@ -3,35 +3,30 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
 }
 
+
+
 use Bitrix\Highloadblock\HighloadBlockTable as HLBT;
 use \Bitrix\Main\Entity;
 
-//\CBitrixComponent::includeComponentClass('highloadblock');
 CModule::IncludeModule('highloadblock');
 
 class CurrencyRates extends CBitrixComponent
 {
 
-    public $errors = [];
-
-    public $arRecievedData = [];
+    private $errors = [];
+    private $hlBlockID;
+    private $hlBlockEntity;
+    protected $request = [];
 
     public $query = '';
 
-    public $baseCurrencyCode = '';
-
-    private $hlBlockID;
-
-    private $hlBlockEntity;
-
-
-    /**
-     * Инициализация сайта
-     */
-    public function init()
+    public function __construct($component)
     {
-        $this->SetHLBlockId();
-        $this->SetSiteCurrency();
+        parent::__construct($component);
+
+        $this->hlBlockID = HL_CURRENCY;
+        $this->arResult['SITE_CURRENCY_CODE'] = CCurrency::GetBaseCurrency();
+
         $this->GetEntityDataClass($this->hlBlockID);
     }
 
@@ -45,31 +40,6 @@ class CurrencyRates extends CBitrixComponent
         }
     }
 
-    /**
-     * Устанавливает ID hl-блока
-     */
-    private function SetHLBlockId()
-    {
-        $this->hlBlockID = HL_CURRENCY;
-    }
-
-    /**
-     * Инициализирует значение валюты сайта
-     */
-    private function SetSiteCurrency()
-    {
-        $this->baseCurrencyCode = CCurrency::GetBaseCurrency();
-    }
-
-    /**
-     * @return string
-     *
-     * Возвращает код валюты сайта
-     */
-    public function GetSiteCurrency()
-    {
-        return $this->baseCurrencyCode;
-    }
 
 
     /**
@@ -120,11 +90,13 @@ class CurrencyRates extends CBitrixComponent
 
     /**
      * @param $date
-     *
      * @return mixed
      *
      * Проверяет наличие элементов по дате
      * Ограничивает дублирование информации
+     */
+    /**
+     * @TODO Переделать проверку на запись, сделать проверку одной конкретной записи
      */
     public function CheckElementsDataExists($date)
     {
@@ -132,7 +104,7 @@ class CurrencyRates extends CBitrixComponent
 
         $arFilter = [
           [
-            "UF_DATE" => $this->FormatDateToSite($date),
+            "UF_DATE" => $this->FormatDateToSite($this->PrepareDate($date)),
           ],
         ];
         $rsData = $entity_data_class::getList([
@@ -188,7 +160,6 @@ class CurrencyRates extends CBitrixComponent
     /**
      * @param $source
      * @param $date
-     *
      * @return string
      *
      * Сбор строки запроса
@@ -197,7 +168,7 @@ class CurrencyRates extends CBitrixComponent
     {
         $query = $source;
         $query .= $this->PrepareDate($date, $stack);
-        $query .= '?base=' . $this->GetSiteCurrency();
+        $query .= '?base=' . $this->arResult['SITE_CURRENCY_CODE'];
         wwq($query);
 
         return $query;
@@ -211,12 +182,16 @@ class CurrencyRates extends CBitrixComponent
      *
      * Записывает информацию в hl-блок
      */
+    /**
+     * @TODO Переделать сохранение даты, сейчас она сохраняет запрашиваемую, а нужно, чтобы для каждой валюты сохранялась дата, соответствующая запрошенному дню
+     */
     public function SaveData($arrData)
     {
         if (!empty($arrData)) {
 
             $queriedDate
-              = $this->FormatDateToSite($this->PrepareDate($_GET['date']));
+              = $this->FormatDateToSite($this->PrepareDate($_GET['date'],
+              false));
 
             $entity_data_class = $this->hlBlockEntity;
             foreach ($arrData['rates'] as $key => $rate) {
@@ -243,11 +218,12 @@ class CurrencyRates extends CBitrixComponent
         wwq('PrepareDate');
         wwq($stack);
         if ((int)$stack) {
-            $result = date('Y-m-d', strtotime('today - 30 days'));
+            $result = strlen($date) ? date('Y-m-d', strtotime('today - 30 days')) : date('Y-m-d');
         } else {
             $result = strlen($date) ? date('Y-m-d', $date) : date('Y-m-d');
         }
         wwq($result);
+        wwq('PrepareDate END');
 
         return $result;
     }
@@ -262,27 +238,6 @@ class CurrencyRates extends CBitrixComponent
     protected function FormatDateToSite($date)
     {
         return date('d.m.Y', strtotime($date));
-    }
-
-    /**
-     * @param $date
-     *
-     * @return false|string
-     *
-     * Приводит дату к формату компонента
-     */
-    protected function FormatDateToComponent($date)
-    {
-        return date('Y-m-d', strtotime($date));
-    }
-
-    /**
-     * Says ASDASDASDASDDASD
-     */
-    public function sayASD()
-    {
-
-        echo 'ASDASDASDASDDASD';
     }
 
     /**
