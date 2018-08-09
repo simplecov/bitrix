@@ -1,6 +1,5 @@
-<?
-if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
-{
+<?php
+if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
 }
 
@@ -13,9 +12,9 @@ CModule::IncludeModule('highloadblock');
 class CurrencyRates extends CBitrixComponent
 {
 
-    public $errors = array();
+    public $errors = [];
 
-    public $arRecievedData = array();
+    public $arRecievedData = [];
 
     public $query = '';
 
@@ -36,10 +35,14 @@ class CurrencyRates extends CBitrixComponent
         $this->GetEntityDataClass($this->hlBlockID);
     }
 
+    /**
+     * Вывод ошибок методом "слепил из того, что было"
+     */
     public function ViewErrors()
     {
-        if(!empty($this->errors))
+        if (!empty($this->errors)) {
             wwq($this->errors);
+        }
     }
 
     /**
@@ -71,14 +74,17 @@ class CurrencyRates extends CBitrixComponent
 
     /**
      * @param $HlBlockId
+     *
      * @return bool
      *
      * Получаем экземпляр класса для манипуляций с hl-блоком
      */
-    function GetEntityDataClass($HlBlockId) {
+    function GetEntityDataClass($HlBlockId)
+    {
 
-        if (empty($HlBlockId) || $HlBlockId < 1)
+        if (empty($HlBlockId) || $HlBlockId < 1) {
             return false;
+        }
 
         $hlblock = HLBT::getById($HlBlockId)->fetch();
         $entity = HLBT::compileEntity($hlblock);
@@ -91,21 +97,22 @@ class CurrencyRates extends CBitrixComponent
     /**
      * @param $source
      * @param $date
+     * @param $stack
+     *
      * @return array
      *
      *  Выполняет запрос
      */
-    public function GetQueryData($source, $date)
+    public function GetQueryData($source, $date, $stack = false)
     {
-        $query = $this->GetQueryString($source, $date);
+        $query = $this->GetQueryString($source, $date, $stack);
 
         $queryData = file_get_contents($query);
         $arrData = json_decode($queryData, true);
 
-        $this->CollectCurrencyCodes($arrData);
-
-        if(empty($arrData))
+        if (empty($arrData)) {
             $this->errors['empty'] = 'Данные не получены, попробуйте позднее';
+        }
 
         return $arrData;
     }
@@ -113,6 +120,7 @@ class CurrencyRates extends CBitrixComponent
 
     /**
      * @param $date
+     *
      * @return mixed
      *
      * Проверяет наличие элементов по дате
@@ -122,22 +130,22 @@ class CurrencyRates extends CBitrixComponent
     {
         $entity_data_class = $this->hlBlockEntity;
 
-        $arFilter = Array(
-            Array(
-                "UF_DATE" => $this->FormatDateToSite($date),
-            )
-        );
-        $rsData = $entity_data_class::getList(array(
-            'select' => array('*'),
-            'runtime' => array(
-                new Entity\ExpressionField('*', 'COUNT(*)')
-            ),
-            'filter' => $arFilter
-        ));
+        $arFilter = [
+          [
+            "UF_DATE" => $this->FormatDateToSite($date),
+          ],
+        ];
+        $rsData = $entity_data_class::getList([
+          'select' => ['*'],
+          'runtime' => [
+            new Entity\ExpressionField('*', 'COUNT(*)'),
+          ],
+          'filter' => $arFilter,
+        ]);
 
-        if((int)$rsData->fetch()['*'] > 0)
-        {
-            $this->errors[] = 'Курсы валют на выбранную дату уже находятся в базе, повторная запись не произведена';
+        if ((int)$rsData->fetch()['*'] > 0) {
+            $this->errors[]
+              = 'Курсы валют на выбранную дату уже находятся в базе, повторная запись не произведена';
             return true;
         }
 
@@ -146,7 +154,7 @@ class CurrencyRates extends CBitrixComponent
 
 
     /**
-     * @param $dateFrom
+     * @param        $dateFrom
      * @param string $dateTo
      *
      * Возвращает элементы по заданным датам
@@ -155,27 +163,24 @@ class CurrencyRates extends CBitrixComponent
     {
         $entity_data_class = $this->hlBlockEntity;
 
-        $arFilter = array();
-        if($dateTo == '')
-        {
+        $arFilter = [];
+        if ($dateTo == '') {
             $arFilter['UF_DATE'] = $this->FormatDateToSite($dateFrom);
-        }
-        else
-        {
+        } else {
             $arFilter['LOGIC'] = "AND";
-            $arFilter[] = array(
-                ">=UF_DATE" => $this->FormatDateToSite($dateFrom)
-            );
-            $arFilter[] = array(
-                "<=UF_DATE" => $this->FormatDateToSite($dateTo)
-            );
+            $arFilter[] = [
+              ">=UF_DATE" => $this->FormatDateToSite($dateFrom),
+            ];
+            $arFilter[] = [
+              "<=UF_DATE" => $this->FormatDateToSite($dateTo),
+            ];
         }
 
-        $rsData = $entity_data_class::getList(array(
-            'select' => array('*'),
-            'filter' => $arFilter
-        ));
-        while($el = $rsData->fetch()){
+        $rsData = $entity_data_class::getList([
+          'select' => ['*'],
+          'filter' => $arFilter,
+        ]);
+        while ($el = $rsData->fetch()) {
             $this->arResult['ELEMENTS'][] = $el;
         }
     }
@@ -183,15 +188,17 @@ class CurrencyRates extends CBitrixComponent
     /**
      * @param $source
      * @param $date
+     *
      * @return string
      *
      * Сбор строки запроса
      */
-    private function GetQueryString($source, $date)
+    private function GetQueryString($source, $date, $stack)
     {
         $query = $source;
-        $query .= $this->PrepareDate($date);
+        $query .= $this->PrepareDate($date, $stack);
         $query .= '?base=' . $this->GetSiteCurrency();
+        wwq($query);
 
         return $query;
     }
@@ -199,25 +206,25 @@ class CurrencyRates extends CBitrixComponent
 
     /**
      * @param $arrData
+     *
      * @throws ReflectionException
      *
      * Записывает информацию в hl-блок
      */
     public function SaveData($arrData)
     {
-        if(!empty($arrData))
-        {
+        if (!empty($arrData)) {
 
-            $queriedDate = $this->FormatDateToSite($this->PrepareDate($_GET['date']));
+            $queriedDate
+              = $this->FormatDateToSite($this->PrepareDate($_GET['date']));
 
             $entity_data_class = $this->hlBlockEntity;
-            foreach ($arrData['rates'] as $key => $rate)
-            {
-                $result = $entity_data_class::add(array(
-                    'UF_VALUE'        => $rate,
-                    'UF_DATE'         => $queriedDate,
-                    'UF_CODE'         => $key,
-                ));
+            foreach ($arrData['rates'] as $key => $rate) {
+                $result = $entity_data_class::add([
+                  'UF_VALUE' => $rate,
+                  'UF_DATE' => $queriedDate,
+                  'UF_CODE' => $key,
+                ]);
 
                 $this->GetResultError($result);
             }
@@ -226,17 +233,28 @@ class CurrencyRates extends CBitrixComponent
 
     /**
      * @param $date
+     *
      * @return false|string
      *
      * Проверяет дату и возвращает подготовленное значение
      */
-    public function PrepareDate($date)
+    public function PrepareDate($date, $stack)
     {
-        return strlen($date) ? $date : date('Y-m-d');
+        wwq('PrepareDate');
+        wwq($stack);
+        if ((int)$stack) {
+            $result = date('Y-m-d', strtotime('today - 30 days'));
+        } else {
+            $result = strlen($date) ? date('Y-m-d', $date) : date('Y-m-d');
+        }
+        wwq($result);
+
+        return $result;
     }
 
     /**
      * @param $date
+     *
      * @return false|string
      *
      * Приводит дату к формату сайта
@@ -248,6 +266,7 @@ class CurrencyRates extends CBitrixComponent
 
     /**
      * @param $date
+     *
      * @return false|string
      *
      * Приводит дату к формату компонента
@@ -260,7 +279,8 @@ class CurrencyRates extends CBitrixComponent
     /**
      * Says ASDASDASDASDDASD
      */
-    public function sayASD(){
+    public function sayASD()
+    {
 
         echo 'ASDASDASDASDDASD';
     }
@@ -268,12 +288,14 @@ class CurrencyRates extends CBitrixComponent
     /**
      * @param $obj
      * @param $prop
+     *
      * @return mixed
      * @throws ReflectionException
      *
      * Получает свойства объекта через reflection
      */
-    private function accessProtected($obj, $prop) {
+    private function accessProtected($obj, $prop)
+    {
 
         $reflection = new ReflectionClass($obj);
         $property = $reflection->getProperty($prop);
@@ -284,24 +306,22 @@ class CurrencyRates extends CBitrixComponent
 
     /**
      * @param $result
+     *
      * @throws ReflectionException
      *
      * Ищет ошибку...жесть, короче
      */
     private function GetResultError($result)
     {
-        if(!empty($result))
-        {
+        if (!empty($result)) {
             $resultErrors = $this->accessProtected($result, errors);
         }
 
-        if(!empty($resultErrors))
-        {
+        if (!empty($resultErrors)) {
             $values = $this->accessProtected($resultErrors, values)[0];
         }
 
-        if(!empty($values))
-        {
+        if (!empty($values)) {
             $errorText = $this->accessProtected($values, message);
             $this->errors[] = $errorText;
         }
@@ -315,8 +335,9 @@ class CurrencyRates extends CBitrixComponent
      */
     private function CollectCurrencyCodes($arrData)
     {
-        if(!empty($arrData))
+        if (!empty($arrData)) {
             $this->arResult['CUR_CODE'] = array_keys($arrData['rates']);
+        }
     }
 
 }

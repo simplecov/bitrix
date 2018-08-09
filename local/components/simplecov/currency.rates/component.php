@@ -34,7 +34,7 @@ $baseCurrency = $this->GetSiteCurrency();
  */
 if($_GET['request'] == 'external')
 {
-    $arrData = $this->GetQueryData($arParams['SOURCE'], $_GET['date']);
+    $arrData = $this->GetQueryData($arParams['SOURCE'], $_GET['date'], $_GET['getstack']);
     if(!$this->CheckElementsDataExists($_GET['date']))
         $this->SaveData($arrData);
 }
