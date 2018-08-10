@@ -19,15 +19,3 @@ foreach ($arResult['ELEMENTS'] as $key => $element)
         $arResult['CURRENCY_CODE'][] = $element['UF_CODE'];
     }
 }
-
-
-
-
-
-
-
-//$arResult['CURRENCY_CODE'] = array();
-//if(!in_array($element['UF_CODE'], $arResult['CURRENCY_CODE']))
-//{
-//    $arResult['CURRENCY_CODE'][] = $element['UF_CODE'];
-//}

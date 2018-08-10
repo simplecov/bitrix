@@ -28,9 +28,10 @@ if (!$this->InitComponentTemplate()) {
  * Обработка внешнего запроса
  */
 if ($_GET['request'] == 'external') {
-    $arrData = $this->GetQueryData($arParams['SOURCE'], $_GET['date'],
-      $_GET['getstack']);
-    wwq($arrData);
+    $this->CreateDateArray();
+    //$this->CreateQueryString($arParams['SOURCE'], $_GET['date']);
+//    $arrData = $this->GetQueryData($arParams['SOURCE'], $_GET['date'], $_GET['getstack']);
+//    wwq($arrData);
     //    if(!$this->CheckElementsDataExists($_GET['date']))
     //        $this->SaveData($arrData);
 }

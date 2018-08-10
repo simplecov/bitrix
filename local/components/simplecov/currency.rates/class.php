@@ -20,7 +20,7 @@ class CurrencyRates extends CBitrixComponent
 
     protected $request = [];
 
-    public $query = '';
+    private $queryString;
 
     public function __construct($component)
     {
@@ -42,7 +42,6 @@ class CurrencyRates extends CBitrixComponent
         }
     }
 
-
     /**
      * @param $HlBlockId
      *
@@ -50,7 +49,7 @@ class CurrencyRates extends CBitrixComponent
      *
      * Получаем экземпляр класса для манипуляций с hl-блоком
      */
-    function GetEntityDataClass($HlBlockId)
+    public function GetEntityDataClass($HlBlockId)
     {
 
         if (empty($HlBlockId) || $HlBlockId < 1) {
@@ -65,20 +64,21 @@ class CurrencyRates extends CBitrixComponent
     }
 
 
-    /**
-     * @param $source
-     * @param $date
-     * @param $stack
-     *
-     * @return array
-     *
-     *  Выполняет запрос
-     */
-    public function GetQueryData($source, $date, $stack = false)
+    public function MultiplyRequest($source)
     {
-        $queryString = $this->CreateQueryString($source, $date, $stack);
+        foreach ($this->arResult['QUERY_DATES'] as $key => $date) {
+            $queryString = $this->CreateQueryString($source, $date);
+            $arData = $this->GetRates($queryString);
+        }
+    }
 
-        return $this->GetRates($queryString);
+    private function CreateQueryString($source, $date)
+    {
+        $query = $source;
+        $query .= $date;
+        $query .= '?base=' . $this->arResult['SITE_CURRENCY_CODE'];
+        wwq($query);
+        return $query;
     }
 
     public function GetRates($queryString)
@@ -93,31 +93,23 @@ class CurrencyRates extends CBitrixComponent
         return $arrData;
     }
 
-    private function CreateQueryString($source, $date)
+    public function PrepareDate($date = null)
     {
-        $query = $source;
-        $query .= $this->PrepareDate($date);
-        $query .= '?base=' . $this->arResult['SITE_CURRENCY_CODE'];
-        wwq($query);
-
-        return $query;
+        return strlen($date) ?
+            date('Y-m-d', $date) :
+            date('Y-m-d', strtotime('today - 30 days'));
     }
 
-    public function PrepareDate($date, $stack)
+
+
+    public function CreateDateArray($days = 30)
     {
-        if ((int)$stack) {
-            $result = strlen($date) ? date('Y-m-d',
-              strtotime('today - 30 days')) : date('Y-m-d');
-        } else {
-            $result = strlen($date) ? date('Y-m-d', $date) : date('Y-m-d');
+        for($i = 0; $i < $days; $i++) {
+            $timeString = 'today - '. $i .' days';
+            $this->arResult['QUERY_DATES'][] = date('Y-m-d', strtotime($timeString));
         }
-
-        return $result;
-    }
-
-    public function CollectQueryData($arrData)
-    {
-
+        $this->arResult['DAYS_COUNT'] = $days;
+        //wwq($this->arResult['DAYS_COUNT']);
     }
 
 
@@ -223,7 +215,6 @@ class CurrencyRates extends CBitrixComponent
             }
         }
     }
-
 
     /**
      * @param $date
