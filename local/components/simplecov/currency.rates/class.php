@@ -11,6 +11,7 @@ CModule::IncludeModule('highloadblock');
 
 class CurrencyRates extends CBitrixComponent
 {
+    private $log = [];
 
     private $errors = [];
 
@@ -63,25 +64,53 @@ class CurrencyRates extends CBitrixComponent
         return true;
     }
 
+    public function SaveData()
+    {
+        if (empty($this->errors)) {
+
+            foreach ($this->arResult['REQUESTED_RATES'] as $date => $rates) {
+
+                $entity_data_class = $this->hlBlockEntity;
+                foreach ($rates as $key => $rate) {
+                    $result = $entity_data_class::add([
+                        'UF_VALUE' => $rate,
+                        'UF_DATE' => $this->FormatDateToSite($date),
+                        'UF_CODE' => $key,
+                    ]);
+
+                    $this->GetResultError($result);
+                }
+            }
+        }
+    }
 
     public function MultiplyRequest($source)
     {
         foreach ($this->arResult['QUERY_DATES'] as $key => $date) {
-            $queryString = $this->CreateQueryString($source, $date);
-            $arData = $this->GetRates($queryString);
+            $queryString = $this->CreateRequestString($source, $date);
+            $currencyRates = $this->GetCurrencyRates($queryString)['rates'];
+
+            if (!empty($currencyRates)) {
+                $this->arResult['REQUESTED_RATES'][$date] = $currencyRates;
+            } else {
+                $this->errors[] = 'Не получены данные для даты ' . $date;
+            }
+
+            wwq($date);
         }
+        wwq($this->arResult);
     }
 
-    private function CreateQueryString($source, $date)
+    private function CreateRequestString($source, $date)
     {
         $query = $source;
         $query .= $date;
         $query .= '?base=' . $this->arResult['SITE_CURRENCY_CODE'];
-        wwq($query);
+        //wwq($query);
         return $query;
     }
 
-    public function GetRates($queryString)
+    public function GetCurrencyRates($queryString)
     {
         $queryData = file_get_contents($queryString);
         $arrData = json_decode($queryData, true);
@@ -99,8 +128,6 @@ class CurrencyRates extends CBitrixComponent
             date('Y-m-d', $date) :
             date('Y-m-d', strtotime('today - 30 days'));
     }
-
-
 
     public function CreateDateArray($days = 30)
     {
@@ -130,7 +157,7 @@ class CurrencyRates extends CBitrixComponent
 
         $arFilter = [
           [
-            "UF_DATE" => $this->FormatDateToSite($this->PrepareDate($date)),
+            "UF_DATE" => $this->FormatDateToSite($date),
           ],
         ];
         $rsData = $entity_data_class::getList([
@@ -183,38 +210,8 @@ class CurrencyRates extends CBitrixComponent
         }
     }
 
-    /**
-     * @param $arrData
-     *
-     * @throws ReflectionException
-     *
-     * Записывает информацию в hl-блок
-     */
-    /**
-     * @TODO Переделать сохранение даты, сейчас она сохраняет запрашиваемую, а
-     *       нужно, чтобы для каждой валюты сохранялась дата, соответствующая
-     *       запрошенному дню
-     */
-    public function SaveData($arrData)
-    {
-        if (!empty($arrData)) {
 
-            $queriedDate
-              = $this->FormatDateToSite($this->PrepareDate($_GET['date'],
-              false));
 
-            $entity_data_class = $this->hlBlockEntity;
-            foreach ($arrData['rates'] as $key => $rate) {
-                $result = $entity_data_class::add([
-                  'UF_VALUE' => $rate,
-                  'UF_DATE' => $queriedDate,
-                  'UF_CODE' => $key,
-                ]);
-
-                $this->GetResultError($result);
-            }
-        }
-    }
 
     /**
      * @param $date

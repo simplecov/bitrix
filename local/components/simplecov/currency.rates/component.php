@@ -29,11 +29,8 @@ if (!$this->InitComponentTemplate()) {
  */
 if ($_GET['request'] == 'external') {
     $this->CreateDateArray();
-    //$this->CreateQueryString($arParams['SOURCE'], $_GET['date']);
-//    $arrData = $this->GetQueryData($arParams['SOURCE'], $_GET['date'], $_GET['getstack']);
-//    wwq($arrData);
-    //    if(!$this->CheckElementsDataExists($_GET['date']))
-    //        $this->SaveData($arrData);
+    $this->MultiplyRequest($arParams['SOURCE']);
+    $this->SaveData();
 }
 
 if ($_GET['request'] == 'internal') {
