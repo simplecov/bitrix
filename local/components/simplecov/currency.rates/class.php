@@ -3,10 +3,6 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
     die();
 }
 
-
-use Bitrix\Highloadblock\HighloadBlockTable as HLBT;
-use \Bitrix\Main\Entity;
-
 CModule::IncludeModule('highloadblock');
 
 class CurrencyRates extends CBitrixComponent
@@ -19,49 +15,27 @@ class CurrencyRates extends CBitrixComponent
 
     private $hlBlockEntity;
 
-    protected $request = [];
-
-    private $queryString;
-
     public function __construct($component)
     {
         parent::__construct($component);
 
-        $this->hlBlockID = HL_CURRENCY;
+        $this->hlBlockID = HL_CURRENCY;//$this->arParams['HL_BLOCK_ID'];
         $this->arResult['SITE_CURRENCY_CODE'] = CCurrency::GetBaseCurrency();
-
-        $this->GetEntityDataClass($this->hlBlockID);
+        $this->hlBlockEntity = Helper::getInstance()->GetEntityDataClass($this->hlBlockID);
     }
 
-    /**
-     * Вывод ошибок методом "слепил из того, что было"
-     */
+    public function ViewLog()
+    {
+        if (!empty($this->log)) {
+            wwq($this->log);
+        }
+    }
+
     public function ViewErrors()
     {
         if (!empty($this->errors)) {
             wwq($this->errors);
         }
-    }
-
-    /**
-     * @param $HlBlockId
-     *
-     * @return bool
-     *
-     * Получаем экземпляр класса для манипуляций с hl-блоком
-     */
-    public function GetEntityDataClass($HlBlockId)
-    {
-
-        if (empty($HlBlockId) || $HlBlockId < 1) {
-            return false;
-        }
-
-        $hlblock = HLBT::getById($HlBlockId)->fetch();
-        $entity = HLBT::compileEntity($hlblock);
-        $this->hlBlockEntity = $entity->getDataClass();
-
-        return true;
     }
 
     public function SaveData()
@@ -71,15 +45,28 @@ class CurrencyRates extends CBitrixComponent
             foreach ($this->arResult['REQUESTED_RATES'] as $date => $rates) {
 
                 $entity_data_class = $this->hlBlockEntity;
-                foreach ($rates as $key => $rate) {
-                    $result = $entity_data_class::add([
-                        'UF_VALUE' => $rate,
-                        'UF_DATE' => $this->FormatDateToSite($date),
-                        'UF_CODE' => $key,
-                    ]);
+                $requestedDate = Helper::getInstance()->FormatDateToSite($date);
 
-                    $this->GetResultError($result);
+                foreach ($rates as $key => $rate) {
+                    wwq($this->CheckElementExists($requestedDate));
+                    if (!$this->CheckElementExists($requestedDate)) {
+                        $result = $entity_data_class::add([
+                            'UF_VALUE' => $rate,
+                            'UF_DATE' => $requestedDate,
+                            'UF_CODE' => $key,
+                        ]);
+
+                        $this->GetResultError($result);
+                    }
                 }
+            }
+
+            if(count($this->errors['duplication'])){
+                $this->errors[] = 'Найдены дубликаты';
+            }
+
+            if(empty($this->errors)){
+                $this->log[] = 'Данные записаны';
             }
         }
     }
@@ -95,10 +82,11 @@ class CurrencyRates extends CBitrixComponent
             } else {
                 $this->errors[] = 'Не получены данные для даты ' . $date;
             }
-
-            wwq($date);
         }
-        wwq($this->arResult);
+
+        if(empty($this->errors)){
+            $this->log[] = 'Данные получены';
+        }
     }
 
     private function CreateRequestString($source, $date)
@@ -106,7 +94,6 @@ class CurrencyRates extends CBitrixComponent
         $query = $source;
         $query .= $date;
         $query .= '?base=' . $this->arResult['SITE_CURRENCY_CODE'];
-        //wwq($query);
         return $query;
     }
 
@@ -115,18 +102,7 @@ class CurrencyRates extends CBitrixComponent
         $queryData = file_get_contents($queryString);
         $arrData = json_decode($queryData, true);
 
-        if (empty($arrData)) {
-            $this->errors['empty'] = 'Данные не получены, попробуйте позднее';
-        }
-
         return $arrData;
-    }
-
-    public function PrepareDate($date = null)
-    {
-        return strlen($date) ?
-            date('Y-m-d', $date) :
-            date('Y-m-d', strtotime('today - 30 days'));
     }
 
     public function CreateDateArray($days = 30)
@@ -136,41 +112,26 @@ class CurrencyRates extends CBitrixComponent
             $this->arResult['QUERY_DATES'][] = date('Y-m-d', strtotime($timeString));
         }
         $this->arResult['DAYS_COUNT'] = $days;
-        //wwq($this->arResult['DAYS_COUNT']);
     }
 
 
-    /**
-     * @param $date
-     *
-     * @return mixed
-     *
-     * Проверяет наличие элементов по дате
-     * Ограничивает дублирование информации
-     */
-    /**
-     * @TODO Переделать проверку на запись, сделать проверку одной конкретной записи
-     */
-    public function CheckElementsDataExists($date)
+    public function CheckElementExists($date)
     {
         $entity_data_class = $this->hlBlockEntity;
 
-        $arFilter = [
-          [
-            "UF_DATE" => $this->FormatDateToSite($date),
-          ],
-        ];
         $rsData = $entity_data_class::getList([
-          'select' => ['*'],
-          'runtime' => [
-            new Entity\ExpressionField('*', 'COUNT(*)'),
-          ],
-          'filter' => $arFilter,
+            'select' => array('UF_DATE'),
+            'limit' => '1',
+            'filter' => array(
+                'UF_DATE' => Helper::getInstance()->FormatDateToSite($date)
+            )
         ]);
 
-        if ((int)$rsData->fetch()['*'] > 0) {
-            $this->errors[]
-              = 'Курсы валют на выбранную дату уже находятся в базе, повторная запись не произведена';
+        wwq($rsData->fetch());
+
+        if ((int)$rsData->fetch() > 0) {
+            $this->errors['duplication']
+              = '1';
             return true;
         }
 
@@ -178,52 +139,6 @@ class CurrencyRates extends CBitrixComponent
     }
 
 
-    /**
-     * @param        $dateFrom
-     * @param string $dateTo
-     *
-     * Возвращает элементы по заданным датам
-     */
-    public function GetElements($dateFrom, $dateTo = '')
-    {
-        $entity_data_class = $this->hlBlockEntity;
-
-        $arFilter = [];
-        if ($dateTo == '') {
-            $arFilter['UF_DATE'] = $this->FormatDateToSite($dateFrom);
-        } else {
-            $arFilter['LOGIC'] = "AND";
-            $arFilter[] = [
-              ">=UF_DATE" => $this->FormatDateToSite($dateFrom),
-            ];
-            $arFilter[] = [
-              "<=UF_DATE" => $this->FormatDateToSite($dateTo),
-            ];
-        }
-
-        $rsData = $entity_data_class::getList([
-          'select' => ['*'],
-          'filter' => $arFilter,
-        ]);
-        while ($el = $rsData->fetch()) {
-            $this->arResult['ELEMENTS'][] = $el;
-        }
-    }
-
-
-
-
-    /**
-     * @param $date
-     *
-     * @return false|string
-     *
-     * Приводит дату к формату сайта
-     */
-    protected function FormatDateToSite($date)
-    {
-        return date('d.m.Y', strtotime($date));
-    }
 
     /**
      * @param $obj

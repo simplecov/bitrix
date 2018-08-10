@@ -2,8 +2,8 @@
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 
 $arComponentDescription = array(
-	"NAME" => GetMessage("MAIN_BREADCRUMB_NAME"),
-	"DESCRIPTION" => GetMessage("MAIN_BREADCRUMB_DESC"),
+	"NAME" => 'Запрос курсов валют',
+	"DESCRIPTION" => 'Запрашивает курсы валют',
 	"ICON" => "/images/breadcrumb.gif",
 	"PATH" => array(
 		"ID" => "utility",

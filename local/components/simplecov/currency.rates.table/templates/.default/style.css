@@ -1,0 +1,34 @@
+.currency-block{
+	padding: 0 0 35px 0;
+}
+
+.request-form{
+	padding: 0 0 15px 0;
+}
+
+.request-form .form-text{
+	display: inline-block;
+	width: 100px;
+}
+
+.datepicker{
+	font-weight: 700;
+	outline: none;
+	border: none;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	-webkit-transition: all .3s;
+	-moz-transition: all .3s;
+	-ms-transition: all .3s;
+	-o-transition: all .3s;
+	transition: all .3s;
+}
+.datepicker:hover{
+	cursor: pointer;
+	background: #f2f2f3;
+}
+
+.table-scroll{
+	overflow: auto;
+}

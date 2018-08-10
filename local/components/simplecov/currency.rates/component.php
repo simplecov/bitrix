@@ -33,10 +33,7 @@ if ($_GET['request'] == 'external') {
     $this->SaveData();
 }
 
-if ($_GET['request'] == 'internal') {
-    $this->GetElements($_GET['dateFrom'], $_GET['dateTo']);
-}
-
+$this->ViewLog();
 $this->ViewErrors();
 $this->IncludeComponentTemplate();
 
