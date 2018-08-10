@@ -4,7 +4,6 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
 }
 
 
-
 use Bitrix\Highloadblock\HighloadBlockTable as HLBT;
 use \Bitrix\Main\Entity;
 
@@ -14,8 +13,11 @@ class CurrencyRates extends CBitrixComponent
 {
 
     private $errors = [];
+
     private $hlBlockID;
+
     private $hlBlockEntity;
+
     protected $request = [];
 
     public $query = '';
@@ -39,7 +41,6 @@ class CurrencyRates extends CBitrixComponent
             wwq($this->errors);
         }
     }
-
 
 
     /**
@@ -75,9 +76,14 @@ class CurrencyRates extends CBitrixComponent
      */
     public function GetQueryData($source, $date, $stack = false)
     {
-        $query = $this->GetQueryString($source, $date, $stack);
+        $queryString = $this->CreateQueryString($source, $date, $stack);
 
-        $queryData = file_get_contents($query);
+        return $this->GetRates($queryString);
+    }
+
+    public function GetRates($queryString)
+    {
+        $queryData = file_get_contents($queryString);
         $arrData = json_decode($queryData, true);
 
         if (empty($arrData)) {
@@ -87,9 +93,37 @@ class CurrencyRates extends CBitrixComponent
         return $arrData;
     }
 
+    private function CreateQueryString($source, $date)
+    {
+        $query = $source;
+        $query .= $this->PrepareDate($date);
+        $query .= '?base=' . $this->arResult['SITE_CURRENCY_CODE'];
+        wwq($query);
+
+        return $query;
+    }
+
+    public function PrepareDate($date, $stack)
+    {
+        if ((int)$stack) {
+            $result = strlen($date) ? date('Y-m-d',
+              strtotime('today - 30 days')) : date('Y-m-d');
+        } else {
+            $result = strlen($date) ? date('Y-m-d', $date) : date('Y-m-d');
+        }
+
+        return $result;
+    }
+
+    public function CollectQueryData($arrData)
+    {
+
+    }
+
 
     /**
      * @param $date
+     *
      * @return mixed
      *
      * Проверяет наличие элементов по дате
@@ -158,24 +192,6 @@ class CurrencyRates extends CBitrixComponent
     }
 
     /**
-     * @param $source
-     * @param $date
-     * @return string
-     *
-     * Сбор строки запроса
-     */
-    private function GetQueryString($source, $date, $stack)
-    {
-        $query = $source;
-        $query .= $this->PrepareDate($date, $stack);
-        $query .= '?base=' . $this->arResult['SITE_CURRENCY_CODE'];
-        wwq($query);
-
-        return $query;
-    }
-
-
-    /**
      * @param $arrData
      *
      * @throws ReflectionException
@@ -183,7 +199,9 @@ class CurrencyRates extends CBitrixComponent
      * Записывает информацию в hl-блок
      */
     /**
-     * @TODO Переделать сохранение даты, сейчас она сохраняет запрашиваемую, а нужно, чтобы для каждой валюты сохранялась дата, соответствующая запрошенному дню
+     * @TODO Переделать сохранение даты, сейчас она сохраняет запрашиваемую, а
+     *       нужно, чтобы для каждой валюты сохранялась дата, соответствующая
+     *       запрошенному дню
      */
     public function SaveData($arrData)
     {
@@ -206,27 +224,6 @@ class CurrencyRates extends CBitrixComponent
         }
     }
 
-    /**
-     * @param $date
-     *
-     * @return false|string
-     *
-     * Проверяет дату и возвращает подготовленное значение
-     */
-    public function PrepareDate($date, $stack)
-    {
-        wwq('PrepareDate');
-        wwq($stack);
-        if ((int)$stack) {
-            $result = strlen($date) ? date('Y-m-d', strtotime('today - 30 days')) : date('Y-m-d');
-        } else {
-            $result = strlen($date) ? date('Y-m-d', $date) : date('Y-m-d');
-        }
-        wwq($result);
-        wwq('PrepareDate END');
-
-        return $result;
-    }
 
     /**
      * @param $date
