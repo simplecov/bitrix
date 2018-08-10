@@ -45,11 +45,12 @@ class CurrencyRates extends CBitrixComponent
             foreach ($this->arResult['REQUESTED_RATES'] as $date => $rates) {
 
                 $entity_data_class = $this->hlBlockEntity;
-                $requestedDate = Helper::getInstance()->FormatDateToSite($date);
+
 
                 foreach ($rates as $key => $rate) {
-                    wwq($this->CheckElementExists($requestedDate));
-                    if (!$this->CheckElementExists($requestedDate)) {
+                    $requestedDate = Helper::getInstance()->FormatDateToSite($date);
+
+                    if (!$this->CheckElementExists($key, $requestedDate)) {
                         $result = $entity_data_class::add([
                             'UF_VALUE' => $rate,
                             'UF_DATE' => $requestedDate,
@@ -61,7 +62,7 @@ class CurrencyRates extends CBitrixComponent
                 }
             }
 
-            if(count($this->errors['duplication'])){
+            if(count($this->errors['duplication']) > 0){
                 $this->errors[] = 'Найдены дубликаты';
             }
 
@@ -115,19 +116,18 @@ class CurrencyRates extends CBitrixComponent
     }
 
 
-    public function CheckElementExists($date)
+    public function CheckElementExists($currencyCode, $date)
     {
         $entity_data_class = $this->hlBlockEntity;
 
         $rsData = $entity_data_class::getList([
-            'select' => array('UF_DATE'),
+            'select' => array('UF_CODE', 'UF_DATE'),
             'limit' => '1',
             'filter' => array(
+                'UF_CODE' => $currencyCode,
                 'UF_DATE' => Helper::getInstance()->FormatDateToSite($date)
             )
         ]);
-
-        wwq($rsData->fetch());
 
         if ((int)$rsData->fetch() > 0) {
             $this->errors['duplication']

@@ -7,9 +7,8 @@ if (!$this->InitComponentTemplate()) {
     return;
 }
 
-$this->GetElements($_GET['dateFrom'], $_GET['dateTo']);
+if ($_GET['request'] == 'internal') {
+    $this->GetElements($_GET['dateFrom'], $_GET['dateTo']);
+}
 
 $this->IncludeComponentTemplate();
-
-
-

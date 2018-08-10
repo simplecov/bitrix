@@ -11,7 +11,7 @@ require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
     Array('HIDE_ICONS' => 'Y')
 );?>
 
-<?$APPLICATION->IncludeComponent("simplecov:currency.rates.table", "", array(
+<?$APPLICATION->IncludeComponent("simplecov:currency.rates.output", "", array(
     'HL_BLOCK_ID' => HL_CURRENCY
 ),
     false,

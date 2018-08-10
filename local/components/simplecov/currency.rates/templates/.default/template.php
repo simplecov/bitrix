@@ -25,7 +25,6 @@ $dateTo = $_GET['dateTo'];
             </div>
         </div>
         <input type="hidden" name="request" value="external">
-        <button type="submit" class="btn btn-success">Запрос</button>
         <button type="submit" name="getstack" value="1" class="btn btn-warning">
             Курс за 30 дней
         </button>
