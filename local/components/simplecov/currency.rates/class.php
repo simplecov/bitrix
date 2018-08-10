@@ -62,11 +62,11 @@ class CurrencyRates extends CBitrixComponent
                 }
             }
 
-            if(count($this->errors['duplication']) > 0){
+            if (count($this->errors['duplication']) > 0) {
                 $this->errors[] = 'Найдены дубликаты';
             }
 
-            if(empty($this->errors)){
+            if (empty($this->errors)) {
                 $this->log[] = 'Данные записаны';
             }
         }
@@ -85,7 +85,7 @@ class CurrencyRates extends CBitrixComponent
             }
         }
 
-        if(empty($this->errors)){
+        if (empty($this->errors)) {
             $this->log[] = 'Данные получены';
         }
     }
@@ -108,8 +108,8 @@ class CurrencyRates extends CBitrixComponent
 
     public function CreateDateArray($days = 30)
     {
-        for($i = 0; $i < $days; $i++) {
-            $timeString = 'today - '. $i .' days';
+        for ($i = 0; $i < $days; $i++) {
+            $timeString = 'today - ' . $i . ' days';
             $this->arResult['QUERY_DATES'][] = date('Y-m-d', strtotime($timeString));
         }
         $this->arResult['DAYS_COUNT'] = $days;
@@ -131,13 +131,12 @@ class CurrencyRates extends CBitrixComponent
 
         if ((int)$rsData->fetch() > 0) {
             $this->errors['duplication']
-              = '1';
+                = '1';
             return true;
         }
 
         return false;
     }
-
 
 
     /**

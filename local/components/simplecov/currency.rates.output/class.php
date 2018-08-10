@@ -17,6 +17,12 @@ class CurrencyRatesOutput extends CBitrixComponent
         $this->hlBlockEntity = Helper::getInstance()->GetEntityDataClass($this->hlBlockID);
     }
 
+    /**
+     * Получает элементы по запрошенным датам
+     *
+     * @param $dateFrom
+     * @param string $dateTo
+     */
     public function GetElements($dateFrom, $dateTo = '')
     {
         $entity_data_class = $this->hlBlockEntity;
