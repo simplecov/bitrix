@@ -5,8 +5,16 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
 
 class CurrencyRatesOutput extends CBitrixComponent
 {
+    /**
+     * Храние ID hl-блока
+     * @var int
+     */
     private $hlBlockID;
 
+    /**
+     * Хранит строку названия класса для заданного hl-блока
+     * @var string
+     */
     private $hlBlockEntity;
 
     public function __construct($component)
@@ -19,7 +27,6 @@ class CurrencyRatesOutput extends CBitrixComponent
 
     /**
      * Получает элементы по запрошенным датам
-     *
      * @param $dateFrom
      * @param string $dateTo
      */

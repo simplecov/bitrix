@@ -7,12 +7,28 @@ CModule::IncludeModule('highloadblock');
 
 class CurrencyRates extends CBitrixComponent
 {
+    /**
+     * Используется для записи логов
+     * @var array
+     */
     private $log = [];
 
+    /**
+     * Используется для записи ошибок
+     * @var array
+     */
     private $errors = [];
 
+    /**
+     * Храние ID hl-блока
+     * @var int
+     */
     private $hlBlockID;
 
+    /**
+     * Хранит строку названия класса для заданного hl-блока
+     * @var string
+     */
     private $hlBlockEntity;
 
     public function __construct($component)
@@ -24,6 +40,9 @@ class CurrencyRates extends CBitrixComponent
         $this->hlBlockEntity = Helper::getInstance()->GetEntityDataClass($this->hlBlockID);
     }
 
+    /**
+     * Выводит лог
+     */
     public function ViewLog()
     {
         if (!empty($this->log)) {
@@ -31,6 +50,9 @@ class CurrencyRates extends CBitrixComponent
         }
     }
 
+    /**
+     * Выводит ошибки
+     */
     public function ViewErrors()
     {
         if (!empty($this->errors)) {
@@ -38,6 +60,11 @@ class CurrencyRates extends CBitrixComponent
         }
     }
 
+    /**
+     * Сохраняет данные в hl-блок
+     * @throws ReflectionException
+     *
+     */
     public function SaveData()
     {
         if (empty($this->errors)) {
@@ -45,7 +72,6 @@ class CurrencyRates extends CBitrixComponent
             foreach ($this->arResult['REQUESTED_RATES'] as $date => $rates) {
 
                 $entity_data_class = $this->hlBlockEntity;
-
 
                 foreach ($rates as $key => $rate) {
                     $requestedDate = Helper::getInstance()->FormatDateToSite($date);
@@ -72,6 +98,10 @@ class CurrencyRates extends CBitrixComponent
         }
     }
 
+    /**
+     * Делает множество запросов
+     * @param $source
+     */
     public function MultiplyRequest($source)
     {
         foreach ($this->arResult['QUERY_DATES'] as $key => $date) {
@@ -90,6 +120,12 @@ class CurrencyRates extends CBitrixComponent
         }
     }
 
+    /**
+     * Собирает строку для запроса
+     * @param $source
+     * @param $date
+     * @return string
+     */
     private function CreateRequestString($source, $date)
     {
         $query = $source;
@@ -98,6 +134,11 @@ class CurrencyRates extends CBitrixComponent
         return $query;
     }
 
+    /**
+     * Делает запрос на сторонний ресурс
+     * @param $queryString
+     * @return mixed
+     */
     public function GetCurrencyRates($queryString)
     {
         $queryData = file_get_contents($queryString);
@@ -106,6 +147,10 @@ class CurrencyRates extends CBitrixComponent
         return $arrData;
     }
 
+    /**
+     * Создает массив дат от текущей и на столько-то дней назад
+     * @param int $days
+     */
     public function CreateDateArray($days = 30)
     {
         for ($i = 0; $i < $days; $i++) {
@@ -115,7 +160,12 @@ class CurrencyRates extends CBitrixComponent
         $this->arResult['DAYS_COUNT'] = $days;
     }
 
-
+    /**
+     * Проверяет наличие элемента в базе. Не дает записать дубликат
+     * @param $currencyCode
+     * @param $date
+     * @return bool
+     */
     public function CheckElementExists($currencyCode, $date)
     {
         $entity_data_class = $this->hlBlockEntity;
@@ -140,13 +190,11 @@ class CurrencyRates extends CBitrixComponent
 
 
     /**
+     * Получает свойства объекта через reflection
      * @param $obj
      * @param $prop
-     *
      * @return mixed
      * @throws ReflectionException
-     *
-     * Получает свойства объекта через reflection
      */
     private function accessProtected($obj, $prop)
     {
@@ -159,11 +207,9 @@ class CurrencyRates extends CBitrixComponent
     }
 
     /**
-     * @param $result
-     *
-     * @throws ReflectionException
-     *
      * Ищет ошибку...жесть, короче
+     * @param $result
+     * @throws ReflectionException
      */
     private function GetResultError($result)
     {
@@ -180,18 +226,6 @@ class CurrencyRates extends CBitrixComponent
             $this->errors[] = $errorText;
         }
 
-    }
-
-    /**
-     * @param $arrData
-     *
-     * Записывает в arResult список кодов полученных валют
-     */
-    private function CollectCurrencyCodes($arrData)
-    {
-        if (!empty($arrData)) {
-            $this->arResult['CUR_CODE'] = array_keys($arrData['rates']);
-        }
     }
 
 }
